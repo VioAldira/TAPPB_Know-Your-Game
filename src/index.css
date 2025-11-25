@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* Animasi tambahan agar transisi halaman halus */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    /* Padding aman untuk iPhone/HP berponi */
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
