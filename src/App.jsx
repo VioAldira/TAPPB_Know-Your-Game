@@ -18,8 +18,7 @@ const authService = {
   login: async (username, password) => {
     try {
       const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?name=eq.${username}&select=*`, {
-        method: 'GET',
-        headers: getHeaders()
+        method: 'GET', headers: getHeaders()
       });
       const users = await response.json();
       if (users.length > 0) {
@@ -27,9 +26,7 @@ const authService = {
         if (user.password === password) return { success: true, data: user };
       }
       return { success: false, message: "Username atau Password salah!" };
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
+    } catch (error) { return { success: false, message: error.message }; }
   },
 
   register: async (username, password) => {
@@ -40,30 +37,22 @@ const authService = {
 
       const payload = { name: username, password: password, bio: "Pengguna Baru", image: null };
       const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(payload)
+        method: 'POST', headers: getHeaders(), body: JSON.stringify(payload)
       });
       
       if (!response.ok) throw new Error("Gagal registrasi");
       return { success: true };
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
+    } catch (error) { return { success: false, message: error.message }; }
   },
 
   updateProfile: async (id, data) => {
     try {
       const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: getHeaders(),
-        body: JSON.stringify(data)
+        method: 'PATCH', headers: getHeaders(), body: JSON.stringify(data)
       });
       const result = await response.json();
       return { success: true, data: result[0] };
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
+    } catch (error) { return { success: false, message: error.message }; }
   }
 };
 
@@ -75,9 +64,7 @@ const gameService = {
       });
       const data = await response.json();
       return { success: true, data: data || [] };
-    } catch (error) {
-      return { success: false, message: error.message, data: [] };
-    }
+    } catch (error) { return { success: false, message: error.message, data: [] }; }
   },
   create: async (gameData) => {
     try {
@@ -132,19 +119,32 @@ const AppLogo = ({ size = "small", center = false }) => {
 
   return (
     <div className={`flex ${containerClass} gap-2 select-none`}>
-       <img 
-         src={LOGO_SRC} 
-         alt="App Logo" 
-         className={`${imgSize} object-contain rounded-lg`}
-       />
-       {/* Teks Dihilangkan Sesuai Permintaan */}
+       <img src={LOGO_SRC} alt="App Logo" className={`${imgSize} object-contain rounded-lg`} onError={(e) => {e.target.style.display='none'}}/>
     </div>
   );
 };
 
+// Logo Besar untuk Halaman Auth & Info
+const BigBranding = ({ titlePrefix }) => (
+  <div className="text-center mb-8">
+    <h2 className="font-bold text-lg mb-2 text-black">{titlePrefix}</h2>
+    <div className="flex flex-col items-center leading-none select-none">
+      <div className="flex items-center">
+        <span className="text-gray-900 font-bold text-6xl tracking-tighter">Know</span>
+        <div className="flex flex-col text-xl text-gray-900 font-bold leading-5 ml-1 justify-center pt-2">
+          <span>U</span>
+          <span>R</span>
+        </div>
+      </div>
+      <span className="text-[#5b4dff] font-bold text-6xl -mt-2">Game</span>
+    </div>
+    <h3 className="font-bold text-sm mt-4 text-black">Your Game Review App</h3>
+  </div>
+);
+
 const AuthInput = ({ label, type = "text", placeholder, value, onChange }) => (
-  <div className="w-full relative border border-black rounded-xl px-4 py-2 focus-within:ring-1 ring-black mb-4 bg-white">
-    <label className="block text-xs text-gray-500 font-bold mb-0.5 absolute -top-2 left-3 bg-white px-1 pointer-events-none">
+  <div className="w-full relative border border-black rounded-xl px-4 py-2 focus-within:ring-2 ring-[#5b4dff] mb-5 bg-white transition-shadow">
+    <label className="block text-xs text-gray-500 font-bold mb-0.5 absolute -top-2.5 left-3 bg-white px-1 pointer-events-none">
       {label}
     </label>
     <input 
@@ -152,7 +152,7 @@ const AuthInput = ({ label, type = "text", placeholder, value, onChange }) => (
       value={value} 
       onChange={onChange} 
       placeholder={placeholder}
-      className="w-full outline-none font-medium text-gray-800 bg-transparent text-sm py-1 placeholder:text-gray-400" 
+      className="w-full outline-none font-medium text-gray-900 bg-transparent text-sm py-1 placeholder:text-gray-400" 
     />
   </div>
 );
@@ -178,19 +178,24 @@ const LoginScreen = ({ onLoginSuccess, onGoToRegister }) => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-8 font-sans">
-      <div className="text-center mb-8">
-        <h2 className="font-bold text-lg mb-2">Welcome To</h2>
-        <AppLogo size="large" center={true} />
-        <h3 className="font-bold text-sm mt-2">Your Game Review App</h3>
-      </div>
-      <h2 className="text-lg font-medium mb-6">Please Login</h2>
-      <div className="w-full max-w-xs">
+      <BigBranding titlePrefix="Welcome To" />
+      <h2 className="text-lg font-medium mb-6 text-black">Please Login</h2>
+
+      <div className="w-full max-w-xs space-y-2">
         <AuthInput label="Name" placeholder="Enter Your Username" value={username} onChange={(e) => setUsername(e.target.value)} />
         <AuthInput label="Password" type="password" placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <button onClick={handleLogin} disabled={loading} className="w-full bg-[#5b4dff] text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-[#4a3edb] transition mt-4 disabled:opacity-70">
-          {loading ? "Logging in..." : "Login"}
+
+        <button 
+          onClick={handleLogin}
+          disabled={loading}
+          className="w-full bg-[#5b4dff] text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-[#4a3edb] transition mt-6 disabled:opacity-70 active:scale-95"
+        >
+          {loading ? <Loader2 className="animate-spin mx-auto" /> : "Login"}
         </button>
-        <p className="text-xs text-gray-600 mt-4 text-center">Doesn't have account? Register <button onClick={onGoToRegister} className="text-[#5b4dff] font-bold">Here</button></p>
+
+        <p className="text-xs text-gray-600 mt-6 text-center">
+          Doesn't have account? Register <button onClick={onGoToRegister} className="text-[#5b4dff] font-bold hover:underline">Here</button>
+        </p>
       </div>
     </div>
   );
@@ -218,20 +223,25 @@ const RegisterScreen = ({ onRegisterSuccess, onGoToLogin }) => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-8 font-sans">
-      <div className="text-center mb-8">
-        <h2 className="font-bold text-lg mb-2">Register To</h2>
-        <AppLogo size="large" center={true} />
-        <h3 className="font-bold text-sm mt-2">Your Game Review App</h3>
-      </div>
-      <h2 className="text-lg font-medium mb-6">Please Register</h2>
-      <div className="w-full max-w-xs">
+      <BigBranding titlePrefix="Register To" />
+      <h2 className="text-lg font-medium mb-6 text-black">Please Register</h2>
+
+      <div className="w-full max-w-xs space-y-2">
         <AuthInput label="Create Username" placeholder="Enter Your Username" value={username} onChange={(e) => setUsername(e.target.value)} />
         <AuthInput label="Create Password" type="password" placeholder="Type a Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <AuthInput label="Confirm Password" type="password" placeholder="Re-type Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-        <button onClick={handleRegister} disabled={loading} className="w-full bg-[#5b4dff] text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-[#4a3edb] transition mt-4 disabled:opacity-70">
-          {loading ? "Registering..." : "Register"}
+        <AuthInput label="Confirm Password" type="password" placeholder="Enter Your Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+
+        <button 
+          onClick={handleRegister}
+          disabled={loading}
+          className="w-full bg-[#5b4dff] text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-[#4a3edb] transition mt-6 disabled:opacity-70 active:scale-95"
+        >
+          {loading ? <Loader2 className="animate-spin mx-auto" /> : "Register"}
         </button>
-        <p className="text-xs text-gray-600 mt-4 text-center">Already have an account? <button onClick={onGoToLogin} className="text-[#5b4dff] font-bold">Login</button></p>
+
+        <p className="text-xs text-gray-600 mt-4 text-center">
+          Already have an account? <button onClick={onGoToLogin} className="text-[#5b4dff] font-bold hover:underline">Login</button>
+        </p>
       </div>
     </div>
   );
@@ -259,7 +269,7 @@ export default function App() {
   const [profileEdit, setProfileEdit] = useState({ name: '', bio: '', image: '' });
   const [passwordEdit, setPasswordEdit] = useState({ oldPassword: '', newPassword: '' });
 
-  // Initialization
+  // --- INITIALIZATION (Persist Login) ---
   useEffect(() => {
     const storedUser = localStorage.getItem('session_user');
     if (storedUser) {
@@ -285,14 +295,13 @@ export default function App() {
 
   const refetch = useCallback(() => setRefetchTrigger(prev => prev + 1), []);
 
-  // Handlers
   const handleLoginSuccess = (user) => {
     localStorage.setItem('session_user', JSON.stringify(user));
     setCurrentUser(user);
     setProfileEdit({ name: user.name, bio: user.bio || "", image: user.image });
     const storedFavs = localStorage.getItem(`favs_${user.id}`);
     setFavorites(storedFavs ? JSON.parse(storedFavs) : []);
-    setActiveTab('home');
+    setActiveTab('home'); 
   };
 
   const handleLogout = () => {
@@ -309,9 +318,12 @@ export default function App() {
   };
 
   const handleProfileUpdate = async () => {
-    if (passwordEdit.newPassword && passwordEdit.oldPassword !== currentUser.password) {
-        return alert("Password lama salah!");
+    if (passwordEdit.newPassword) {
+        if (passwordEdit.oldPassword !== currentUser.password) {
+            return alert("Password lama salah!");
+        }
     }
+
     setIsSubmitting(true);
     const updatedData = {
       name: profileEdit.name,
@@ -319,6 +331,7 @@ export default function App() {
       image: profileEdit.image,
       password: passwordEdit.newPassword || currentUser.password
     };
+
     const res = await authService.updateProfile(currentUser.id, updatedData);
     if (res.success) {
       const newUser = { ...currentUser, ...updatedData };
@@ -335,9 +348,11 @@ export default function App() {
   const toggleFavorite = (game, e) => {
     e?.stopPropagation();
     let newFavs;
+    // Cek apakah game ada di favorit berdasarkan ID
     if (favorites.some(fav => fav.id === game.id)) {
       newFavs = favorites.filter(fav => fav.id !== game.id);
     } else {
+      // Simpan seluruh objek game agar data tersedia offline/tanpa fetch ulang
       newFavs = [...favorites, game];
     }
     setFavorites(newFavs);
@@ -345,17 +360,16 @@ export default function App() {
   };
 
   const handleDeleteGame = async (id) => {
-    if(window.confirm("Hapus review ini?")) {
+    if(window.confirm("Hapus review ini dari database?")) {
         setIsSubmitting(true);
         const res = await gameService.delete(id);
         if (res.success) {
+            // Hapus dari state favorites juga agar sinkron
             const newFavs = favorites.filter(f => f.id !== id);
             setFavorites(newFavs);
             if(currentUser) localStorage.setItem(`favs_${currentUser.id}`, JSON.stringify(newFavs));
             refetch();
-        } else {
-            alert(res.message);
-        }
+        } else alert(res.message);
         setIsSubmitting(false);
     }
   };
@@ -368,22 +382,29 @@ export default function App() {
   const handleFormSubmit = async () => {
     if (!formData.title || !formData.description) return alert("Lengkapi data!");
     setIsSubmitting(true);
+    
     const payload = { 
         title: formData.title,
         platform: formData.platform,
         rating: parseFloat(formData.rating),
         description: formData.description,
         image: formData.image,
-        link: formData.link
+        link: formData.link,
+        is_user_created: true,
+        uploader_id: currentUser.id,       
+        uploader_name: currentUser.name,   
+        uploader_avatar: currentUser.image 
     };
+    
     let res;
     if (formMode === 'upload') {
-        res = await gameService.create({ ...payload, is_user_created: true });
+        res = await gameService.create(payload);
         if(res.success) { alert("Berhasil upload!"); setActiveTab('profile'); }
     } else {
         res = await gameService.update(formData.id, payload);
         if(res.success) alert("Berhasil update!");
     }
+    
     if(!res.success) alert("Gagal: " + res.message);
     refetch();
     setViewMode('main');
@@ -392,11 +413,37 @@ export default function App() {
 
   const handleSendComment = async () => {
     if (!commentInput.trim()) return;
-    const comment = { user_name: currentUser.name, user_avatar: currentUser.image, text: commentInput };
+    const comment = { 
+        user_name: currentUser.name, 
+        user_avatar: currentUser.image, 
+        text: commentInput 
+    };
+    
+    // 1. Update objek game lokal dengan komentar baru
     const updatedReviews = [...(selectedGame.reviews || []), comment];
-    setSelectedGame({ ...selectedGame, reviews: updatedReviews }); // Optimistic update
+    const updatedGame = { ...selectedGame, reviews: updatedReviews };
+    
+    // 2. Update tampilan detail langsung (Optimistic UI)
+    setSelectedGame(updatedGame);
+    
+    // 3. [BUG FIX] Update data di state utama 'games' agar sinkron
+    setGames(prevGames => prevGames.map(g => g.id === selectedGame.id ? updatedGame : g));
+
+    // 4. [BUG FIX] Update data di state 'favorites' jika game tersebut difavoritkan
+    if (favorites.some(f => f.id === selectedGame.id)) {
+        const newFavs = favorites.map(f => f.id === selectedGame.id ? updatedGame : f);
+        setFavorites(newFavs);
+        // Update storage favorites juga
+        if(currentUser) localStorage.setItem(`favs_${currentUser.id}`, JSON.stringify(newFavs));
+    }
+
     setCommentInput('');
-    await gameService.addComment({ game_id: selectedGame.id, ...comment });
+    
+    // 5. Kirim ke database
+    await gameService.addComment({
+        game_id: selectedGame.id,
+        ...comment
+    });
   };
 
   const handleImageUpload = async (e, type) => {
@@ -413,6 +460,7 @@ export default function App() {
   };
 
   // --- RENDER CONTENT ---
+
   if (!currentUser) {
     if (authMode === 'register') return <RegisterScreen onRegisterSuccess={() => setAuthMode('login')} onGoToLogin={() => setAuthMode('login')} />;
     return <LoginScreen onLoginSuccess={handleLoginSuccess} onGoToRegister={() => setAuthMode('register')} />;
@@ -440,7 +488,6 @@ export default function App() {
     </div>
   );
 
-  // 3. DETAIL VIEW (SAFE RENDER)
   if (viewMode === 'detail' && selectedGame) return (
     <div className="min-h-screen bg-white flex flex-col pb-24 font-sans"> 
       <Header showBack={true} onBack={handleBack} />
@@ -450,16 +497,17 @@ export default function App() {
         <div className="mb-6 space-y-2 text-sm"><p className="font-medium text-gray-600 flex items-center gap-2"><span className="bg-gray-200 px-2 py-0.5 rounded text-xs text-gray-800">Platform</span> {selectedGame.platform}</p><p className="font-medium flex items-center gap-2"><span className="bg-gray-200 px-2 py-0.5 rounded text-xs text-gray-800">Link</span> <a href={`https://${selectedGame.link}`} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline truncate max-w-[200px]">{selectedGame.link}</a></p></div>
         <div className="flex gap-3 mb-8">
           <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-400 shadow-sm">
-             {selectedGame.is_user_created && currentUser.image ? (<img src={currentUser.image} className="w-full h-full object-cover" alt="Uploader" />) : (<div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500"><User size={24} /></div>)}
+             {selectedGame.is_user_created && selectedGame.uploader_avatar ? (<img src={selectedGame.uploader_avatar} className="w-full h-full object-cover" alt="Uploader" />) : (<div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500"><User size={24} /></div>)}
           </div>
           <div className="border border-black rounded-2xl p-4 w-full relative bg-gray-50">
-            <span className="text-xs text-gray-500 font-bold block mb-2 uppercase tracking-wider">{selectedGame.is_user_created ? currentUser.name : "Official Reviewer"}</span>
+            <span className="text-xs text-gray-500 font-bold block mb-2 uppercase tracking-wider">
+              {selectedGame.is_user_created ? selectedGame.uploader_name || "Unknown" : "Official Reviewer"}
+            </span>
             <p className="font-medium text-sm text-gray-800 leading-relaxed">{selectedGame.description}</p>
           </div>
         </div>
         <h3 className="font-bold text-black text-lg mb-3 flex items-center gap-2"><Send size={18} className="rotate-45"/> Comments</h3>
         <div className="space-y-3 mb-6">
-          {/* SAFE CHECK FOR REVIEWS ARRAY */}
           {(selectedGame.reviews || []).length > 0 ? (selectedGame.reviews || []).map((rev, idx) => (
             <div key={idx} className="bg-white border border-gray-200 rounded-xl p-3 flex gap-3 items-start shadow-sm">
               <div className="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0 flex items-center justify-center text-[0.5rem] text-gray-600 overflow-hidden">{rev.user_avatar ? <img src={rev.user_avatar} className="w-full h-full object-cover"/> : "IMG"}</div>
@@ -478,7 +526,7 @@ export default function App() {
 
   const filteredGames = games.filter(g => g.title.toLowerCase().includes(searchQuery.toLowerCase()));
   const displayedGames = activeTab === 'favorites' ? favorites : filteredGames;
-  const myPosts = games.filter(g => g.is_user_created);
+  const myPosts = games.filter(g => g.is_user_created && g.uploader_id === currentUser.id);
 
   return (
     <div className="min-h-screen bg-white flex flex-col pb-20 font-sans">
@@ -487,8 +535,7 @@ export default function App() {
       {activeTab === 'info' && (
         <div className="flex-1 flex flex-col items-center justify-center px-8 text-center animate-fade-in">
           <h2 className="text-gray-900 font-bold text-2xl mb-4">Welcome To</h2>
-          <AppLogo size="large" center={true} />
-          <h3 className="text-black font-bold text-lg mt-6 mb-8">Your Game Review App</h3>
+          <BigBranding titlePrefix="" />
           <p className="text-[#5b4dff] text-sm mb-4 font-medium text-justify leading-relaxed">Know Your Game is a progressive web app integrated with Supabase Database & Storage.</p>
           <button onClick={() => setActiveTab('home')} className="text-black font-bold text-lg hover:underline tracking-wide border-2 border-black px-8 py-3 rounded-xl hover:bg-black hover:text-white transition-colors">TRY IT NOW!</button>
         </div>
