@@ -8,4 +8,5 @@
         extend: {},
       },
       plugins: [],
+      darkMode: 'class',
     }
